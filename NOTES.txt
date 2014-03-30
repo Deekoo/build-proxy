@@ -1,0 +1,4 @@
+To test the fixups for checkouts from non-root parts of an svn repo, try
+running
+        svn export --non-interactive -r201 http://svn.nomi.cz/svn/isteve/hotplug2 hotplug2-201
+as sudomesh.

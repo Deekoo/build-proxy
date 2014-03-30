@@ -1,0 +1,89 @@
+These are the scripts to support using a caching proxy to build OpenWRT,
+so you can have reproducable, auditable builds.  Note that this does not
+by itself make the code secure - it just makes it *theoretically possible*
+for you to perform a security audit on it.
+
+It also saves bandwidth and time - with the mirror, you don't have to wait
+on 300-odd megs of source code per architecture built (not counting the
+svn checkout of openwrt itself, too) each time you do a clean build.
+
+With the caching proxy, if you tweak something and then rebuild the firmware, 
+you're building from the same sources you used last time.  Note that this is
+a mixed blessing - your build isn't going to be broken by bugs introduced
+by upstream developers, but you're also not going to get upstream bugfixes
+unless you explicitly make an effort to do so.
+
+Assumptions:
+
+User 'sudomesh' builds the firmware.  User 'sudomirror' maintains the mirror.
+A third user has root.
+
+There is an http server on localhost, and ~/public_html/ maps to ~username
+URLs.
+
+~/bin/ is in the default path ahead of systemwide binaries.
+
+You have svnrdump.  (If your systemwide version of subversion does not include
+svnrdump, you can compile a newer version and drop the svnrdump binary in
+~sudomirror/bin/ )
+
+To use (from the build proxy directory):
+
+As root, create the users 'sudomesh' and 'sudomirror'.
+        adduser sudomesh
+        adduser sudomirror
+And set up the firewall rules:
+        ./firewall.sh
+
+As sudomesh:
+        mkdir ~/bin
+        ln -sf sudomesh-bin/* ~/bin/
+
+As sudomirror, configure the mirror:
+        mkdir ~/bin
+        ln -sf sudomirror-bin/* ~/bin/
+        prep-cloneserver.sh
+
+If prep-cloneserver.sh returns 'command not found', you probably need to log
+out and log back in to both the sudomesh and sudomirror accounts.  If it STILL
+returns 'command not found' after logging back in, then you'll need to put
+~/bin/ in your path in both the sudomesh and sudomirror accounts.
+
+As sudomirror, start the mirror:
+        build-proxy.py
+        cloneserver.py --allow-write
+
+Only use --allow-write when you actively intend to permit the mirror to be
+updated.  (Necessary on the first build, NOT necessary on subsequent builds.)
+
+As sudomesh, check out the OpenWRT firmware:
+        git clone https://github.com/sudomesh/sudowrt-firmware.git
+
+And build it:
+        cd sudowrt-firmware
+        ./prepare
+
+The first time, it will download all the sources and cache them.  If you
+want to start the cloneserver without allowing it to download new files,
+run it without --allow-write.
+
+--- ---
+
+Other caveats:
+
+This runs as two separate users to prevent an attacker from concealing
+modifications to the sources from you.  An attacker who controls the right
+parts of the network and can create an MD5 collision, or who otherwise
+controls the openwrt firmware source, can still execute whatever code
+they like as sudomesh.
+
+prepare and the OpenWRT build scripts try multiple mirrors when looking
+for sources to download.  The first source tried is not always valid; an
+attacker who controls the right parts of the net could, when --allow-write
+is set on the cloneserver, inject their own code in the place of higher
+priority mirrors.
+
+The scripts also assume that git, svn, svnsync, svnrdump, and svnadmin
+never execute code downloaded from the remote.  I do not know if this is
+true, I'm just assuming that it is!
+

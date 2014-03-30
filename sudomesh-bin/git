@@ -1,0 +1,34 @@
+#!/usr/bin/perl
+@A = ('/usr/bin/git');
+while (@ARGV) {
+        $arg = shift @ARGV;
+        if ($arg=~/^https\:\/\/([0-9A-Za-z.]+)\/(.*)$/s) {
+                print "Getting git from HTTPS URL $arg\n";
+                $URL = $arg;
+                push @A, "http://localhost/~sudomirror/mirror/git-https/$1/$2";
+        } elsif ($arg=~/^git:\/\/(.*?)\/(.*)$/s) {
+                print "Getting git from git URL $arg\n";
+                $URL = $arg;
+                push @A, "http://localhost/~sudomirror/mirror/git/$1/$2";
+        } elsif ($arg=~/^http:\/\/(.*?)\/(.*)$/s) {
+                print "Getting git from http URL $arg\n";
+                $URL = $arg;
+                push @A, "http://localhost/~sudomirror/mirror/git-http/$1/$2";
+        } elsif ($arg eq '--depth') {
+                print STDERR "(stripping depth.)\n";
+                shift @ARGV;
+        } else {
+                push @A, $arg;
+        }
+}
+if (defined $URL) {
+    print STDERR "About to request clone of $URL\n";
+	$resp = `echo git \"$URL\"|nc localhost 8082`;
+	if ($resp !~ /^ok /s) {
+		die "Error requesting cloneserver mirror $URL\n";
+	}
+} else {
+	print STDERR "No URL in (@A)\n";
+}
+print STDERR "About to exec (@A)\n";
+exec @A;

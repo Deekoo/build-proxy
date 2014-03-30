@@ -1,0 +1,34 @@
+[ 0.2.1+ ]
+* HTTP repo cloning warning now only displayed if actually trying to clone
+an HTTP repo.
+* cloneserver now closes connections after sending the ok/fail message.
+* git stub now tries to get the mirror to clone things.
+* Cloneserver now logs attempts.
+* Wget mirrorer now accepts / in URLs
+* prep-cloneserver script added.
+* cloneserver: wget mirroring works.
+* cloneserver: wget mirroring now uses preexisting files if one exists.
+* Build script: wget mirroring works.
+* Improved logging.
+[ 0.2.3 ]
+* svn mirroring now distinguishes between http and svn protocol mirrors.
+* svn mirroring now works correctly when mirroring something that's a path
+under the full repository - e.g. http://svn.nomi.cz/svn/isteve/hotplug2 is
+actually in the http://svn.nomi.cz/svn/isteve/ repo.  Symlinks from
+(mirror root)/svn-(protocol)-roots/(domain)/(url path) to the actual mirror
+directory are created when mirroring completes.
+* A number of errors and warnings now say which app they're from.
+[ 0.2.4 ]
+* _ accepted in svn clone urls
+* Cloneserver scripts now set umask 022.
+* Now uses svnrdump for Subversion mirroring, which seems to be much much
+faster.
+[ 0.2.5 ]
+* hackish fixup for OpenWRT subversion sync broken by fast mirror, so removed.
+* svnrdump doesn't work with HTTP svn mirrors, so use svnsync when cloning
+non-svn:// svn URLs.
+* git now mirrors to per-protocol paths.
+* Can now clone git https repos.
+[ 0.3 ]
+* Documentation clarifications.
+[ 0.3.1 ]

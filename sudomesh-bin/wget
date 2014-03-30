@@ -1,0 +1,17 @@
+#!/usr/bin/perl
+@A = ('/usr/bin/wget');
+for $arg (@ARGV) {
+	if ($arg=~/^http:\/\/([0-9a-z\.]+)\/([-.\/0-9A-Z_a-z]+)$/s) {
+		$URL = $arg
+	}
+	push @A,$arg;
+}
+if (!defined($URL)) {
+	die "Could not get URL from args (@ARGV)\n";
+}
+$resp = `echo wget "$URL"|nc localhost 8082`;
+if ($resp !~ /^ok/s) {
+	die "wget failed: $resp\n";
+}
+print STDERR "About to exec (@A)\n";
+exec(@A);

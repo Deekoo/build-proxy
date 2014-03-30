@@ -1,0 +1,51 @@
+#!/usr/bin/perl
+
+@A = ('/usr/bin/svn');
+for $arg (@ARGV) {
+        if ($arg=~/^svn:\/\/(.*)$/s) {
+                push @A, "file:///home/sudomirror/public_html/mirror/svn/$1";
+                if ($URL) {
+                        die "Multiple URLs on command line\n";
+                }
+                $URL = $arg;
+        } elsif ($arg=~/^http:\/\/(.*)$/s) {
+                push @A,"file:///home/sudomirror/public_html/mirror/svn-http/$1";
+                if ($URL) {
+                        die "Multiple URLs on command line\n";
+                }
+                $URL = $arg;
+        } else {
+                push @A, $arg;
+        }
+}
+if (not defined($URL)) {
+    die "[proxy svn:] No URL in (@ARGV)\n";
+}
+if ($URL!~/^[.\/0-9:_a-z]+$/s) {
+    die "[proxy svn:] Error: Invalid characters in $URL\n";
+}
+print "[proxy svn:] Debug: contacting cloneserver for $URL\n";
+$resp = `echo svn \"$URL\"|nc localhost 8082`;
+if ($?) {
+    die "[proxy svn:] Error contacting cloneserver: $?\n";
+}
+print "Debug: Response $resp\n";
+if ($resp =~ /^fail/s) {
+    die "[proxy svn:] Mirror server replied: $resp.\n";
+}
+print "[proxy svn:] About to run (@A)\n";
+system @A;
+if ($?) {
+  die "svn exited with an error.\n";
+}
+#use Cwd;
+#if ($URL eq 'svn://svn.openwrt.org/openwrt/branches/attitude_adjustment') {
+#  $tmp = Cwd::realpath("$A[$#A]/../tmp");
+#  print "[proxy svn:] Tmpdir is $tmp\n";
+#  system('rm','-rf','--',$tmp);
+#  rename($A[$#A],$tmp) or die "[proxy svn:] rename $A[$#A] $tmp: $!\n";
+#  rename("$tmp/branches/attitude_adjustment",$A[$#A]) or die "[proxy svn:] Rename $!\n";
+#} else {
+#  print "[proxy svn:] Warning: Don't have fixups for $URL!\n";
+#  exit 0;
+#}

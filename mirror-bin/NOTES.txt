@@ -1,0 +1,55 @@
+svn-clonerepo started in Slow Mode Mar 24 22:58 on Transfinity for svn://coreboot.org/coreboot/trunk/util/nvramtool
+
+svn-clonerepo started on build.sudomesh.org in Fast Mode at 23:06; done
+before 23:09. (coreboot nvramtool)
+
+Started a prepare around 23:14 on Transfinity; OpenWRT is mirroring.
+        500meg by 11:37.
+
+Started a prepare sometime before 23:38 (Probably around 23:30) on build.sudomesh.
+
+
+
+---
+With Subversion 1.8.8 (probably >=1.7), drastically faster mirroring appears
+attainable using svnrdump:
+  622  ./svnrdump dump svn://svn.openwrt.org/openwrt/ -r HEAD >openwrt.dump
+  635  svnadmin create test
+  640  echo '#!/bin/sh'> ~/test/hooks/pre-revprop-change
+  641  chmod 755 ~/test/hooks/pre-revprop-change
+svnadmin load /home/deekoo/test/<openwrt.dump 
+
+Note that svnrdump load uses up all available memory on large datasets, 
+such as OpenWRT.
+
+
+---
+Cloning Subversion repos takes forever!  Example:
+Started cloning OpenWRT around midnight Mar 19.  At revision 756 now.
+
+ svnadmin create arch
+echo '#!/bin/sh' > arch/hooks/pre-revprop-change
+ chmod 755 arch/hooks/pre-revprop-change
+ svnsync init file:///home/sudomirror/tmp/arch svn://svn.openwrt.org/openwrt/branches/attitude_adjustment
+ svn info svn://svn.openwrt.org/openwrt/branches/attitude_adjustment
+Path: attitude_adjustment
+URL: svn://svn.openwrt.org/openwrt/branches/attitude_adjustment
+Repository Root: svn://svn.openwrt.org/openwrt
+Repository UUID: 3c298f89-4303-0410-b956-a3cf2f4a3e73
+Revision: 39952
+Node Kind: directory
+Last Changed Author: nbd
+Last Changed Rev: 39952
+Last Changed Date: 2014-03-18 17:36:28 -0700 (Tue, 18 Mar 2014)
+
+svn proplist --revprop -r0 file:///home/sudomirror/tmp/arch
+--
+Unversioned properties on revision 0:
+  svn:sync-last-merged-rev
+  svn:date
+  svn:sync-from-url
+  svn:sync-from-uuid
+
+--
+# last-merged-rev is NOT useful.
+svn propset --revprop -r0 svn:sync-from-uuid 3c298f89-4303-0410-b956-a3cf2f4a3e73 file:///home/sudomirror/tmp/arch

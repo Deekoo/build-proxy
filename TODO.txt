@@ -1,0 +1,27 @@
+In addition to --allow-write, the cloneserver has an undocumented
+--allow-update option.  This may well be broken (old notes suggest I didn't
+quite get it right for svn.  Using svnrdump to get a clone of a Subversion
+repo in a reasonable timeframe leads to the svn repos being in a state where
+svnsync gets congused); it should probably be fixed, to make it easier to
+add changes to a mirror.
+
+Wget mirror could support ftp.
+
+Some svn and git repository-copy operations may currently put them in the
+mirror even when the download is interrupted, which will probably break
+attempts to check them out from the mirror.  (Some of those have been fixed,
+but I haven't exhaustively checked to see if they all are.)
+
+The cloneserver is strictly single-threaded and only handles a single
+connection at a time.  This will probably screw up parallelized builds
+(e.g. 'make -j9' or the like)
+
+This could be modified to allow the cloneserver and/or build proxy to live
+on a different machine than the actual build process, thus mitigating local
+root vulnerabilities.
+
+This could be modified a bit more to allow for the creation of local in-mesh
+persistent cachemirrors of chunks of the more-static parts of the web - though
+that's got its own caveats, since the most useful thing I can think of to
+do with such mirrors would be stuff like 'local mirror of all the Debian
+security updates'.
